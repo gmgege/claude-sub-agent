@@ -97,13 +97,13 @@ graph TD
 
    ```bash
    # 在你的项目中创建 .claude 目录结构
-   mkdir -p .claude/agents
+   mkdir -p .claude/agents .claude/commands
    
    # 从此仓库复制代理
    cp agents/* .claude/agents/
    
-   # 复制 slash 命令
-   cp commands/agent-workflow.md .claude/commands/
+   # 复制 slash 命令（包括工作流恢复命令）
+   cp commands/agent-workflow*.md .claude/commands/
    ```
 
 3. **验证安装**
@@ -114,7 +114,9 @@ graph TD
    your-project/
    ├── .claude/
    │   ├── commands/
-   │   │   └── agent-workflow.md   # Slash 命令
+   │   │   ├── agent-workflow.md         # 工作流启动命令
+   │   │   ├── agent-workflow-resume.md  # 工作流恢复命令
+   │   │   └── agent-workflow-list.md    # 工作流列表命令
    │   └── agents/
    │       ├── spec-analyst.md
    │       ├── spec-architect.md
@@ -209,6 +211,28 @@ Claude (spec-orchestrator)：正在启动个人博客平台的工作流...
 - `--phase=[planning|development|validation|all]`: 运行特定阶段
 - `--output-dir=[路径]`: 指定输出目录
 - `--language=[zh|en]`: 文档语言
+
+### 工作流恢复功能
+
+当工作流被中断时，可以使用恢复功能继续之前的进度：
+
+```bash
+# 恢复特定工作流
+/agent-workflow-resume <WORKFLOW_ID>
+
+# 自动恢复最近的未完成工作流
+/agent-workflow-resume
+
+# 查看所有可恢复的工作流
+/agent-workflow-list
+```
+
+#### 恢复功能特性
+
+- **状态持久化**：自动保存工作流进度和上下文
+- **智能恢复**：从最后完成的阶段继续执行
+- **会话感知**：监控会话时间限制，自动暂停长时间任务
+- **错误恢复**：处理状态损坏和丢失的工作流
 
 **📖 完整的 slash 命令文档请参见 [commands/agent-workflow.md](./commands/agent-workflow.md)**
 
@@ -373,39 +397,425 @@ Claude (spec-orchestrator)：正在启动个人博客平台的工作流...
 
 ## 高级用法
 
-### 自定义工作流
+### 工作流状态管理
 
-```python
-# 创建自定义工作流配置
-workflow_config = {
-    "quality_threshold": 90,
-    "skip_agents": ["spec-analyst"],  # 如果你已有需求
-    "parallel": True,
-    "custom_validators": ["security-scan", "performance-test"],
-    "output_format": "markdown"
-}
+#### 工作流持久化存储
 
-# 使用自定义配置执行
-"使用 spec-orchestrator，配置：" + json.dumps(workflow_config)
+```bash
+# 设置自定义工作流存储目录
+export CLAUDE_WORKFLOW_DIR="./my-workflows"
+
+# 工作流状态自动保存到指定目录
+/agent-workflow "电商平台开发" --save-state
+
+# 从特定目录恢复工作流
+/agent-workflow-resume --from-dir "./backup-workflows"
 ```
 
-### CI/CD 集成
+#### 工作流备份与恢复
+
+```bash
+# 备份所有工作流状态
+tar -czf workflows-backup-$(date +%Y%m%d).tar.gz .claude/workflows/
+
+# 恢复工作流状态
+tar -xzf workflows-backup-20240802.tar.gz
+
+# 批量清理过期工作流（超过30天）
+find .claude/workflows/ -name "*.json" -mtime +30 -delete
+```
+
+### 自定义工作流模板
+
+#### 创建可重用的工作流模板
 
 ```yaml
-# GitHub Actions 示例
-name: AI 工作流验证
-on: [pull_request]
+# .claude/templates/enterprise-web-app.yml
+name: "企业级Web应用模板"
+description: "标准企业Web应用开发流程"
+config:
+  quality_threshold: 95
+  skip_agents: []
+  phases:
+    - spec-analyst
+    - spec-architect  
+    - spec-planner
+    - spec-developer
+    - spec-tester
+    - spec-reviewer
+    - spec-validator
+  custom_validators:
+    - security-scan
+    - performance-test
+    - accessibility-check
+  required_artifacts:
+    - requirements.md
+    - architecture.md
+    - api-spec.md
+    - test-plan.md
+    - deployment-guide.md
+```
+
+```bash
+# 使用模板启动工作流
+/agent-workflow "新CRM系统" --template=enterprise-web-app
+
+# 列出可用模板
+/agent-workflow --list-templates
+```
+
+#### 领域特定工作流
+
+```yaml
+# .claude/templates/mobile-app.yml
+name: "移动应用开发模板"
+config:
+  quality_threshold: 90
+  focus_areas: [performance, security, ux]
+  platform_specific:
+    ios: 
+      - swift-validation
+      - app-store-guidelines
+    android:
+      - kotlin-validation  
+      - play-store-guidelines
+  testing_strategy:
+    - unit_tests: 80%
+    - integration_tests: 60%
+    - e2e_tests: 40%
+    - performance_tests: required
+```
+
+### 高级代理配置
+
+#### 代理能力扩展
+
+```markdown
+# .claude/agents/custom-security-validator.md
+---
+description: "专业安全验证代理，专注于漏洞检测和安全最佳实践"
+capabilities: ["security-scan", "vulnerability-assessment", "compliance-check"]
+integration_points: ["spec-reviewer", "spec-validator"]
+---
+
+# 自定义安全验证代理
+
+执行深度安全分析：
+- OWASP Top 10 漏洞检测
+- 依赖项安全扫描
+- 代码静态安全分析
+- 配置安全检查
+- 数据隐私合规验证
+```
+
+#### 代理链路自定义
+
+```python
+# 自定义代理执行序列
+custom_workflow = {
+    "phases": [
+        {
+            "name": "enhanced-planning",
+            "agents": ["spec-analyst", "ui-ux-master", "spec-architect"],
+            "parallel": True,
+            "timeout": "60min"
+        },
+        {
+            "name": "development",
+            "agents": ["spec-planner", "spec-developer"],
+            "parallel": False,
+            "dependencies": ["enhanced-planning"]
+        },
+        {
+            "name": "quality-assurance",
+            "agents": ["spec-tester", "custom-security-validator", "spec-reviewer"],
+            "parallel": True,
+            "quality_gate": 92
+        }
+    ]
+}
+```
+
+### 企业级集成
+
+#### CI/CD 流水线集成
+
+```yaml
+# .github/workflows/ai-development.yml
+name: AI 驱动开发流水线
+on:
+  push:
+    branches: [feature/*]
+  pull_request:
+    branches: [main]
+
 jobs:
-  validate:
+  ai-development:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: 运行 Spec 验证
+      - uses: actions/checkout@v4
+      
+      - name: 设置 Claude Code 环境
         run: |
-          # 使用 Claude Code CLI（如果可用）
-          claude-code run spec-orchestrator \
-            --phase validation \
-            --project-path .
+          curl -sSL https://get.claude.ai/install.sh | sh
+          claude-code auth ${{ secrets.CLAUDE_API_KEY }}
+      
+      - name: 运行规划阶段
+        if: github.event_name == 'push'
+        run: |
+          /agent-workflow "${{ github.event.head_commit.message }}" \
+            --phase=planning \
+            --output-dir=./planning-artifacts
+      
+      - name: 代码质量验证
+        if: github.event_name == 'pull_request'
+        run: |
+          /agent-workflow-resume --phase=validation \
+            --strict-mode \
+            --fail-on-quality=90
+      
+      - name: 上传工作流产物
+        uses: actions/upload-artifact@v3
+        with:
+          name: ai-development-artifacts
+          path: |
+            ./planning-artifacts/
+            ./.claude/workflows/
+```
+
+#### Jenkins 集成
+
+```groovy
+// Jenkinsfile
+pipeline {
+    agent any
+    
+    stages {
+        stage('AI Development Planning') {
+            when { 
+                branch 'feature/*' 
+            }
+            steps {
+                script {
+                    def featureName = env.BRANCH_NAME.replace('feature/', '')
+                    sh """
+                        /agent-workflow "${featureName}" \
+                            --phase=planning \
+                            --quality=95 \
+                            --output-format=json
+                    """
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: '.claude/workflows/*.json'
+                }
+            }
+        }
+        
+        stage('AI Code Review') {
+            when {
+                changeRequest()
+            }
+            steps {
+                sh '''
+                    /agent-workflow-resume \
+                        --phase=validation \
+                        --generate-report
+                '''
+            }
+            post {
+                always {
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: '.claude/reports',
+                        reportFiles: 'validation-report.html',
+                        reportName: 'AI Code Review Report'
+                    ])
+                }
+            }
+        }
+    }
+}
+```
+
+### 监控和分析
+
+#### 工作流性能监控
+
+```bash
+# 启用详细监控
+export CLAUDE_WORKFLOW_METRICS=true
+export CLAUDE_WORKFLOW_LOG_LEVEL=debug
+
+# 工作流执行时间分析
+/agent-workflow "性能优化项目" --profile --benchmark
+
+# 生成性能报告
+claude-workflow-analyzer --input=.claude/workflows/ --output=performance-report.html
+```
+
+#### 质量趋势分析
+
+```python
+# workflow-analytics.py
+import json
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def analyze_quality_trends():
+    workflows = load_workflow_history()
+    
+    # 质量分数趋势
+    quality_scores = [w['final_quality_score'] for w in workflows]
+    dates = [w['completion_date'] for w in workflows]
+    
+    plt.plot(dates, quality_scores)
+    plt.title('工作流质量趋势')
+    plt.ylabel('质量分数')
+    plt.xlabel('日期')
+    plt.show()
+    
+    # 阶段耗时分析
+    phase_times = analyze_phase_durations(workflows)
+    print(f"平均规划时间: {phase_times['planning']}分钟")
+    print(f"平均开发时间: {phase_times['development']}分钟")
+    print(f"平均验证时间: {phase_times['validation']}分钟")
+
+# 运行分析
+analyze_quality_trends()
+```
+
+### 团队协作增强
+
+#### 工作流共享和协作
+
+```bash
+# 共享工作流状态
+/agent-workflow "团队项目" --share-with="team@company.com"
+
+# 协作模式启动工作流
+/agent-workflow "多人协作项目" --collaborative \
+    --reviewers="alice@company.com,bob@company.com" \
+    --auto-notify
+
+# 工作流权限管理
+claude-workflow-acl --workflow-id=workflow_123 \
+    --grant-read="team-leads" \
+    --grant-write="senior-devs"
+```
+
+#### 代码审查集成
+
+```yaml
+# .claude/config/review-rules.yml
+review_rules:
+  automatic_reviewers:
+    - role: "senior-developer"
+      required_for: ["spec-developer", "spec-reviewer"]
+    - role: "security-expert" 
+      required_for: ["custom-security-validator"]
+    - role: "ui-ux-expert"
+      required_for: ["ui-ux-master"]
+  
+  quality_gates:
+    planning: 
+      min_score: 95
+      required_approvals: 2
+    development:
+      min_score: 90
+      required_approvals: 1
+      auto_merge: false
+    validation:
+      min_score: 95
+      required_approvals: 3
+      auto_merge: true
+```
+
+### 扩展系统
+
+#### 创建自定义代理
+
+```bash
+# 代理生成器
+claude-agent-generator \
+    --name="custom-database-architect" \
+    --domain="database-design" \
+    --capabilities="schema-design,query-optimization,migration-planning" \
+    --integration-points="spec-architect,spec-developer"
+```
+
+#### 插件开发
+
+```javascript
+// claude-workflow-plugin.js
+class CustomValidatorPlugin {
+    constructor(config) {
+        this.config = config;
+    }
+    
+    async validate(artifacts) {
+        // 自定义验证逻辑
+        const results = await this.runCustomValidation(artifacts);
+        return {
+            score: results.score,
+            feedback: results.feedback,
+            required_actions: results.actions
+        };
+    }
+    
+    async runCustomValidation(artifacts) {
+        // 实现特定的验证规则
+        return {
+            score: 95,
+            feedback: "验证通过",
+            actions: []
+        };
+    }
+}
+
+module.exports = CustomValidatorPlugin;
+```
+
+### 性能优化
+
+#### 工作流缓存策略
+
+```bash
+# 启用智能缓存
+export CLAUDE_WORKFLOW_CACHE=redis://localhost:6379
+export CLAUDE_CACHE_TTL=3600  # 1小时
+
+# 缓存预热
+/agent-workflow --cache-warm \
+    --templates="enterprise-web-app,mobile-app" \
+    --common-artifacts="requirements,architecture"
+
+# 缓存清理
+claude-cache-manager --clean-expired --optimize-storage
+```
+
+#### 并行执行优化
+
+```yaml
+# .claude/config/performance.yml
+execution:
+  max_parallel_agents: 4
+  timeout_settings:
+    planning_phase: 60min
+    development_phase: 180min
+    validation_phase: 45min
+  
+  resource_limits:
+    memory_per_agent: 2GB
+    cpu_per_agent: 2cores
+    
+  optimization:
+    enable_lazy_loading: true
+    prefetch_dependencies: true
+    compress_artifacts: true
 ```
 
 ### 扩展系统

@@ -102,8 +102,8 @@ graph TD
    # Copy agents from this repository
    cp agents/* .claude/agents/
    
-   # Copy slash command
-   cp commands/agent-workflow.md .claude/commands/
+   # Copy slash commands (including workflow resume commands)
+   cp commands/agent-workflow*.md .claude/commands/
    ```
 
 3. **Verify installation**
@@ -114,7 +114,9 @@ graph TD
    your-project/
    ├── .claude/
    │   ├── commands/
-   │   │   └── agent-workflow.md   # Slash command
+   │   │   ├── agent-workflow.md         # Workflow start command
+   │   │   ├── agent-workflow-resume.md  # Workflow resume command
+   │   │   └── agent-workflow-list.md    # Workflow list command
    │   └── agents/
    │       ├── spec-analyst.md
    │       ├── spec-architect.md
@@ -209,6 +211,28 @@ For the quickest way to start a complete workflow, use our custom slash command:
 - `--phase=[planning|development|validation|all]`: Run specific phases
 - `--output-dir=[path]`: Specify output directory
 - `--language=[zh|en]`: Documentation language
+
+### Workflow Resume Feature
+
+When workflows are interrupted, you can use the resume functionality to continue from where you left off:
+
+```bash
+# Resume specific workflow
+/agent-workflow-resume <WORKFLOW_ID>
+
+# Auto-resume most recent incomplete workflow
+/agent-workflow-resume
+
+# List all resumable workflows
+/agent-workflow-list
+```
+
+#### Resume Features
+
+- **State Persistence**: Automatically saves workflow progress and context
+- **Smart Recovery**: Continues from the last completed phase
+- **Session Awareness**: Monitors session time limits and auto-pauses long tasks
+- **Error Recovery**: Handles corrupted states and missing workflows
 
 **📖 For complete slash command documentation, see [commands/agent-workflow.md](./commands/agent-workflow.md)**
 
@@ -373,39 +397,425 @@ Validate the project in ./my-app/
 
 ## Advanced Usage
 
-### Custom Workflows
+### Workflow State Management
 
-```python
-# Create custom workflow configuration
-workflow_config = {
-    "quality_threshold": 90,
-    "skip_agents": ["spec-analyst"],  # If you have requirements
-    "parallel": True,
-    "custom_validators": ["security-scan", "performance-test"],
-    "output_format": "markdown"
-}
+#### Workflow Persistence
 
-# Execute with custom config
-"Use spec-orchestrator with config: " + json.dumps(workflow_config)
+```bash
+# Set custom workflow storage directory
+export CLAUDE_WORKFLOW_DIR="./my-workflows"
+
+# Auto-save workflow state to specified directory
+/agent-workflow "E-commerce platform development" --save-state
+
+# Resume workflow from specific directory
+/agent-workflow-resume --from-dir "./backup-workflows"
 ```
 
-### Integration with CI/CD
+#### Workflow Backup and Recovery
+
+```bash
+# Backup all workflow states
+tar -czf workflows-backup-$(date +%Y%m%d).tar.gz .claude/workflows/
+
+# Restore workflow states
+tar -xzf workflows-backup-20240802.tar.gz
+
+# Batch cleanup of expired workflows (older than 30 days)
+find .claude/workflows/ -name "*.json" -mtime +30 -delete
+```
+
+### Custom Workflow Templates
+
+#### Creating Reusable Workflow Templates
 
 ```yaml
-# GitHub Actions example
-name: AI Workflow Validation
-on: [pull_request]
+# .claude/templates/enterprise-web-app.yml
+name: "Enterprise Web Application Template"
+description: "Standard enterprise web application development process"
+config:
+  quality_threshold: 95
+  skip_agents: []
+  phases:
+    - spec-analyst
+    - spec-architect  
+    - spec-planner
+    - spec-developer
+    - spec-tester
+    - spec-reviewer
+    - spec-validator
+  custom_validators:
+    - security-scan
+    - performance-test
+    - accessibility-check
+  required_artifacts:
+    - requirements.md
+    - architecture.md
+    - api-spec.md
+    - test-plan.md
+    - deployment-guide.md
+```
+
+```bash
+# Use template to start workflow
+/agent-workflow "New CRM System" --template=enterprise-web-app
+
+# List available templates
+/agent-workflow --list-templates
+```
+
+#### Domain-Specific Workflows
+
+```yaml
+# .claude/templates/mobile-app.yml
+name: "Mobile Application Development Template"
+config:
+  quality_threshold: 90
+  focus_areas: [performance, security, ux]
+  platform_specific:
+    ios: 
+      - swift-validation
+      - app-store-guidelines
+    android:
+      - kotlin-validation  
+      - play-store-guidelines
+  testing_strategy:
+    - unit_tests: 80%
+    - integration_tests: 60%
+    - e2e_tests: 40%
+    - performance_tests: required
+```
+
+### Advanced Agent Configuration
+
+#### Agent Capability Extensions
+
+```markdown
+# .claude/agents/custom-security-validator.md
+---
+description: "Professional security validation agent focused on vulnerability detection and security best practices"
+capabilities: ["security-scan", "vulnerability-assessment", "compliance-check"]
+integration_points: ["spec-reviewer", "spec-validator"]
+---
+
+# Custom Security Validation Agent
+
+Performs comprehensive security analysis:
+- OWASP Top 10 vulnerability detection
+- Dependency security scanning
+- Static security code analysis
+- Configuration security checks
+- Data privacy compliance validation
+```
+
+#### Custom Agent Execution Chains
+
+```python
+# Custom agent execution sequence
+custom_workflow = {
+    "phases": [
+        {
+            "name": "enhanced-planning",
+            "agents": ["spec-analyst", "ui-ux-master", "spec-architect"],
+            "parallel": True,
+            "timeout": "60min"
+        },
+        {
+            "name": "development",
+            "agents": ["spec-planner", "spec-developer"],
+            "parallel": False,
+            "dependencies": ["enhanced-planning"]
+        },
+        {
+            "name": "quality-assurance",
+            "agents": ["spec-tester", "custom-security-validator", "spec-reviewer"],
+            "parallel": True,
+            "quality_gate": 92
+        }
+    ]
+}
+```
+
+### Enterprise Integration
+
+#### CI/CD Pipeline Integration
+
+```yaml
+# .github/workflows/ai-development.yml
+name: AI-Driven Development Pipeline
+on:
+  push:
+    branches: [feature/*]
+  pull_request:
+    branches: [main]
+
 jobs:
-  validate:
+  ai-development:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Run Spec Validation
+      - uses: actions/checkout@v4
+      
+      - name: Setup Claude Code Environment
         run: |
-          # Use Claude Code CLI (if available)
-          claude-code run spec-orchestrator \
-            --phase validation \
-            --project-path .
+          curl -sSL https://get.claude.ai/install.sh | sh
+          claude-code auth ${{ secrets.CLAUDE_API_KEY }}
+      
+      - name: Run Planning Phase
+        if: github.event_name == 'push'
+        run: |
+          /agent-workflow "${{ github.event.head_commit.message }}" \
+            --phase=planning \
+            --output-dir=./planning-artifacts
+      
+      - name: Code Quality Validation
+        if: github.event_name == 'pull_request'
+        run: |
+          /agent-workflow-resume --phase=validation \
+            --strict-mode \
+            --fail-on-quality=90
+      
+      - name: Upload Workflow Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ai-development-artifacts
+          path: |
+            ./planning-artifacts/
+            ./.claude/workflows/
+```
+
+#### Jenkins Integration
+
+```groovy
+// Jenkinsfile
+pipeline {
+    agent any
+    
+    stages {
+        stage('AI Development Planning') {
+            when { 
+                branch 'feature/*' 
+            }
+            steps {
+                script {
+                    def featureName = env.BRANCH_NAME.replace('feature/', '')
+                    sh """
+                        /agent-workflow "${featureName}" \
+                            --phase=planning \
+                            --quality=95 \
+                            --output-format=json
+                    """
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: '.claude/workflows/*.json'
+                }
+            }
+        }
+        
+        stage('AI Code Review') {
+            when {
+                changeRequest()
+            }
+            steps {
+                sh '''
+                    /agent-workflow-resume \
+                        --phase=validation \
+                        --generate-report
+                '''
+            }
+            post {
+                always {
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: '.claude/reports',
+                        reportFiles: 'validation-report.html',
+                        reportName: 'AI Code Review Report'
+                    ])
+                }
+            }
+        }
+    }
+}
+```
+
+### Monitoring and Analytics
+
+#### Workflow Performance Monitoring
+
+```bash
+# Enable detailed monitoring
+export CLAUDE_WORKFLOW_METRICS=true
+export CLAUDE_WORKFLOW_LOG_LEVEL=debug
+
+# Workflow execution time analysis
+/agent-workflow "Performance optimization project" --profile --benchmark
+
+# Generate performance report
+claude-workflow-analyzer --input=.claude/workflows/ --output=performance-report.html
+```
+
+#### Quality Trend Analysis
+
+```python
+# workflow-analytics.py
+import json
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def analyze_quality_trends():
+    workflows = load_workflow_history()
+    
+    # Quality score trends
+    quality_scores = [w['final_quality_score'] for w in workflows]
+    dates = [w['completion_date'] for w in workflows]
+    
+    plt.plot(dates, quality_scores)
+    plt.title('Workflow Quality Trends')
+    plt.ylabel('Quality Score')
+    plt.xlabel('Date')
+    plt.show()
+    
+    # Phase duration analysis
+    phase_times = analyze_phase_durations(workflows)
+    print(f"Average planning time: {phase_times['planning']} minutes")
+    print(f"Average development time: {phase_times['development']} minutes")
+    print(f"Average validation time: {phase_times['validation']} minutes")
+
+# Run analysis
+analyze_quality_trends()
+```
+
+### Team Collaboration Enhancement
+
+#### Workflow Sharing and Collaboration
+
+```bash
+# Share workflow state
+/agent-workflow "Team project" --share-with="team@company.com"
+
+# Start collaborative workflow
+/agent-workflow "Multi-person collaborative project" --collaborative \
+    --reviewers="alice@company.com,bob@company.com" \
+    --auto-notify
+
+# Workflow permission management
+claude-workflow-acl --workflow-id=workflow_123 \
+    --grant-read="team-leads" \
+    --grant-write="senior-devs"
+```
+
+#### Code Review Integration
+
+```yaml
+# .claude/config/review-rules.yml
+review_rules:
+  automatic_reviewers:
+    - role: "senior-developer"
+      required_for: ["spec-developer", "spec-reviewer"]
+    - role: "security-expert" 
+      required_for: ["custom-security-validator"]
+    - role: "ui-ux-expert"
+      required_for: ["ui-ux-master"]
+  
+  quality_gates:
+    planning: 
+      min_score: 95
+      required_approvals: 2
+    development:
+      min_score: 90
+      required_approvals: 1
+      auto_merge: false
+    validation:
+      min_score: 95
+      required_approvals: 3
+      auto_merge: true
+```
+
+### System Extensions
+
+#### Creating Custom Agents
+
+```bash
+# Agent generator
+claude-agent-generator \
+    --name="custom-database-architect" \
+    --domain="database-design" \
+    --capabilities="schema-design,query-optimization,migration-planning" \
+    --integration-points="spec-architect,spec-developer"
+```
+
+#### Plugin Development
+
+```javascript
+// claude-workflow-plugin.js
+class CustomValidatorPlugin {
+    constructor(config) {
+        this.config = config;
+    }
+    
+    async validate(artifacts) {
+        // Custom validation logic
+        const results = await this.runCustomValidation(artifacts);
+        return {
+            score: results.score,
+            feedback: results.feedback,
+            required_actions: results.actions
+        };
+    }
+    
+    async runCustomValidation(artifacts) {
+        // Implement specific validation rules
+        return {
+            score: 95,
+            feedback: "Validation passed",
+            actions: []
+        };
+    }
+}
+
+module.exports = CustomValidatorPlugin;
+```
+
+### Performance Optimization
+
+#### Workflow Caching Strategy
+
+```bash
+# Enable intelligent caching
+export CLAUDE_WORKFLOW_CACHE=redis://localhost:6379
+export CLAUDE_CACHE_TTL=3600  # 1 hour
+
+# Cache warming
+/agent-workflow --cache-warm \
+    --templates="enterprise-web-app,mobile-app" \
+    --common-artifacts="requirements,architecture"
+
+# Cache cleanup
+claude-cache-manager --clean-expired --optimize-storage
+```
+
+#### Parallel Execution Optimization
+
+```yaml
+# .claude/config/performance.yml
+execution:
+  max_parallel_agents: 4
+  timeout_settings:
+    planning_phase: 60min
+    development_phase: 180min
+    validation_phase: 45min
+  
+  resource_limits:
+    memory_per_agent: 2GB
+    cpu_per_agent: 2cores
+    
+  optimization:
+    enable_lazy_loading: true
+    prefetch_dependencies: true
+    compress_artifacts: true
 ```
 
 ### Extending the System

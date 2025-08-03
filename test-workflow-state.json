@@ -1,0 +1,41 @@
+{
+  "workflowId": "workflow_test_1691234567890",
+  "feature": "简单待办列表应用",
+  "currentPhase": "spec-developer",
+  "progress": {
+    "completed": 2,
+    "total": 5,
+    "percentage": 40
+  },
+  "iterations": {
+    "current": 1,
+    "max": 3
+  },
+  "lastUpdated": "2024-08-02T15:30:45.000Z",
+  "phases": {
+    "spec-analyst": {
+      "status": "completed",
+      "score": null
+    },
+    "spec-architect": {
+      "status": "completed", 
+      "score": null
+    },
+    "spec-developer": {
+      "status": "in_progress",
+      "score": null
+    },
+    "spec-validator": {
+      "status": "pending",
+      "score": null
+    },
+    "spec-tester": {
+      "status": "pending",
+      "score": null
+    }
+  },
+  "artifacts": [
+    "requirements.md",
+    "architecture.md"
+  ]
+}
