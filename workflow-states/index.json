@@ -1,0 +1,39 @@
+{
+  "version": "1.0.0",
+  "created": "2024-08-03T00:00:00.000Z",
+  "lastUpdated": "2024-08-03T15:50:00.000Z",
+  "totalWorkflows": 3,
+  "workflowsByStatus": {
+    "active": 1,
+    "paused": 1,
+    "completed": 1,
+    "failed": 0,
+    "archived": 0
+  },
+  "workflows": {
+    "workflow_dev_platform_test_1725364245000": {
+      "feature": "个人开发者需求调研分析平台",
+      "status": "active",
+      "currentPhase": "spec-developer",
+      "progress": 40,
+      "lastUpdated": "2024-08-03T15:45:12.000Z",
+      "location": "workflow-states/active/workflow_dev_platform_test_1725364245000.json"
+    },
+    "workflow_ecommerce_platform_1725300000000": {
+      "feature": "E-commerce platform with payment integration",
+      "status": "paused",
+      "currentPhase": "spec-validator",
+      "progress": 60,
+      "lastUpdated": "2024-08-03T13:22:15.000Z",
+      "location": "workflow-states/paused/workflow_ecommerce_platform_1725300000000.json"
+    },
+    "workflow_simple_todo_1725200000000": {
+      "feature": "简单待办列表应用",
+      "status": "completed",
+      "currentPhase": "spec-tester",
+      "progress": 100,
+      "lastUpdated": "2024-08-02T02:45:30.000Z",
+      "location": "workflow-states/completed/workflow_simple_todo_1725200000000.json"
+    }
+  }
+}

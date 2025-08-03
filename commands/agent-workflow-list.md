@@ -21,15 +21,34 @@ Display all incomplete agent workflows with their current status and resume info
 
 ## Your Role
 
-You are the Workflow Status Reporter. Load all workflow states and present a comprehensive overview of incomplete workflows.
+You are the Workflow Status Reporter. Use the workflow-state-manager sub agent to load all workflow states and present a comprehensive overview of incomplete workflows.
 
 ## Implementation Steps
 
-1. **Load State Manager**: Initialize workflow state management system
-2. **Scan Workflows**: Find all incomplete workflow files
-3. **Load Details**: Read state details for each workflow
-4. **Format Display**: Present information in organized, readable format
-5. **Provide Actions**: Show resume commands for each workflow
+1. **Initialize State Manager**: Use workflow-state-manager sub agent for operations
+2. **Scan Workflows**: Find all incomplete workflow files in workflow-states directory
+3. **Load and Validate**: Read state details for each workflow with validation
+4. **Filter and Sort**: Filter incomplete workflows and sort by relevance
+5. **Format Display**: Present information in organized, readable format
+6. **Provide Actions**: Show resume commands and quick actions
+
+## State Manager Integration
+
+```javascript
+// List incomplete workflows using workflow-state-manager
+const incompleteWorkflows = await useWorkflowStateManager({
+  operation: 'list-states',
+  filter: {
+    status: ['active', 'paused', 'failed'],
+    sortBy: 'lastUpdated',
+    order: 'desc'
+  }
+});
+
+// Format and display results
+const formattedList = formatWorkflowList(incompleteWorkflows);
+presentWorkflowOverview(formattedList);
+```
 
 ## Expected Output Format
 
@@ -80,9 +99,9 @@ Loading workflow state manager and scanning for incomplete workflows...
 ### 🔍 Scanning Workflow Directory
 
 First scan the workflow directory for all saved states:
-- Load workflow state management system
-- Scan .claude/workflows directory for JSON files
-- Filter for incomplete workflows (status != 'completed')
+- Use workflow-state-manager sub agent to scan workflow-states directory
+- Load and validate JSON state files across all status directories
+- Filter for incomplete workflows (active, paused, failed statuses)
 - Sort by last updated time (most recent first)
 
 ### 📊 Loading Workflow Details

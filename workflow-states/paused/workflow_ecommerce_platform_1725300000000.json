@@ -1,0 +1,106 @@
+{
+  "workflowId": "workflow_ecommerce_platform_1725300000000",
+  "feature": "E-commerce platform with payment integration and user management",
+  "createdAt": "2024-08-02T21:30:00.000Z",
+  "lastUpdated": "2024-08-03T13:22:15.000Z",
+  "status": "paused",
+  "currentPhase": "spec-validator",
+  "progress": {
+    "completed": 3,
+    "total": 5,
+    "percentage": 60
+  },
+  "iterations": {
+    "current": 1,
+    "max": 3,
+    "history": [
+      {
+        "iteration": 1,
+        "phase": "spec-analyst",
+        "startTime": "2024-08-02T21:30:00.000Z",
+        "endTime": "2024-08-02T22:15:30.000Z",
+        "outcome": "completed"
+      },
+      {
+        "iteration": 1,
+        "phase": "spec-architect",
+        "startTime": "2024-08-02T22:15:30.000Z",
+        "endTime": "2024-08-03T00:45:12.000Z",
+        "outcome": "completed"
+      },
+      {
+        "iteration": 1,
+        "phase": "spec-developer",
+        "startTime": "2024-08-03T00:45:12.000Z",
+        "endTime": "2024-08-03T13:10:25.000Z",
+        "outcome": "completed"
+      }
+    ]
+  },
+  "phases": {
+    "spec-analyst": {
+      "status": "completed",
+      "score": null,
+      "startTime": "2024-08-02T21:30:00.000Z",
+      "endTime": "2024-08-02T22:15:30.000Z",
+      "iterations": 1,
+      "artifacts": ["requirements.md", "user-stories.md", "acceptance-criteria.md"],
+      "feedback": null
+    },
+    "spec-architect": {
+      "status": "completed",
+      "score": 97,
+      "startTime": "2024-08-02T22:15:30.000Z",
+      "endTime": "2024-08-03T00:45:12.000Z",
+      "iterations": 1,
+      "artifacts": ["architecture.md", "api-spec.md", "tech-stack.md", "database-schema.md"],
+      "feedback": null
+    },
+    "spec-developer": {
+      "status": "completed",
+      "score": 92,
+      "startTime": "2024-08-03T00:45:12.000Z",
+      "endTime": "2024-08-03T13:10:25.000Z",
+      "iterations": 1,
+      "artifacts": ["src/", "tests/unit/", "package.json", "docker-compose.yml"],
+      "feedback": null
+    },
+    "spec-validator": {
+      "status": "in_progress",
+      "score": null,
+      "startTime": "2024-08-03T13:10:25.000Z",
+      "endTime": null,
+      "iterations": 1,
+      "artifacts": ["validation-report-draft.md"],
+      "feedback": null
+    },
+    "spec-tester": {
+      "status": "pending",
+      "score": null,
+      "startTime": null,
+      "endTime": null,
+      "iterations": 0,
+      "artifacts": [],
+      "feedback": null
+    }
+  },
+  "artifacts": {
+    "requirements": ["requirements.md", "user-stories.md", "acceptance-criteria.md"],
+    "architecture": ["architecture.md", "api-spec.md", "tech-stack.md", "database-schema.md"],
+    "implementation": ["src/", "tests/unit/", "package.json", "docker-compose.yml"],
+    "tests": [],
+    "validation": ["validation-report-draft.md"]
+  },
+  "session": {
+    "sessionId": "session_ecommerce_1725300000000",
+    "timeRemaining": 0,
+    "lastCheckpoint": "2024-08-03T13:22:15.000Z",
+    "pauseReason": "session-limit-reached"
+  },
+  "config": {
+    "qualityThreshold": 95,
+    "maxIterations": 3,
+    "autoSave": true,
+    "saveInterval": 5
+  }
+}

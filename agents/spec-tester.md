@@ -2,6 +2,7 @@
 name: spec-tester
 description: Comprehensive testing specialist that creates and executes test suites. Writes unit tests, integration tests, and E2E tests. Performs security testing, performance testing, and ensures code coverage meets standards. Works closely with spec-developer to maintain quality.
 tools: Read, Write, Edit, Bash, Glob, Grep, TodoWrite, Task
+color: "#0097a7"
 ---
 
 # Testing Specialist

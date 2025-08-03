@@ -1,0 +1,92 @@
+{
+  "workflowId": "workflow_dev_platform_test_1725364245000",
+  "feature": "个人开发者需求调研分析平台-个人网站，游戏，app等，从各种渠道收集对比分析信息并给出盈利预期和开发难度",
+  "createdAt": "2024-08-03T15:30:45.000Z",
+  "lastUpdated": "2024-08-03T15:45:12.000Z",
+  "status": "active",
+  "currentPhase": "spec-developer",
+  "progress": {
+    "completed": 2,
+    "total": 5,
+    "percentage": 40
+  },
+  "iterations": {
+    "current": 1,
+    "max": 3,
+    "history": [
+      {
+        "iteration": 1,
+        "phase": "spec-analyst",
+        "startTime": "2024-08-03T15:30:45.000Z",
+        "endTime": "2024-08-03T15:38:20.000Z",
+        "outcome": "completed"
+      }
+    ]
+  },
+  "phases": {
+    "spec-analyst": {
+      "status": "completed",
+      "score": null,
+      "startTime": "2024-08-03T15:30:45.000Z",
+      "endTime": "2024-08-03T15:38:20.000Z",
+      "iterations": 1,
+      "artifacts": ["requirements.md", "user-stories.md", "acceptance-criteria.md"],
+      "feedback": null
+    },
+    "spec-architect": {
+      "status": "completed",
+      "score": 95,
+      "startTime": "2024-08-03T15:38:20.000Z",
+      "endTime": "2024-08-03T15:44:55.000Z",
+      "iterations": 1,
+      "artifacts": ["architecture.md", "api-spec.md", "tech-stack.md"],
+      "feedback": null
+    },
+    "spec-developer": {
+      "status": "in_progress",
+      "score": null,
+      "startTime": "2024-08-03T15:44:55.000Z",
+      "endTime": null,
+      "iterations": 1,
+      "artifacts": ["src/components/", "src/services/", "package.json"],
+      "feedback": null
+    },
+    "spec-validator": {
+      "status": "pending",
+      "score": null,
+      "startTime": null,
+      "endTime": null,
+      "iterations": 0,
+      "artifacts": [],
+      "feedback": null
+    },
+    "spec-tester": {
+      "status": "pending",
+      "score": null,
+      "startTime": null,
+      "endTime": null,
+      "iterations": 0,
+      "artifacts": [],
+      "feedback": null
+    }
+  },
+  "artifacts": {
+    "requirements": ["requirements.md", "user-stories.md", "acceptance-criteria.md"],
+    "architecture": ["architecture.md", "api-spec.md", "tech-stack.md"],
+    "implementation": ["src/components/", "src/services/", "package.json"],
+    "tests": [],
+    "validation": []
+  },
+  "session": {
+    "sessionId": "session_test_1725364245000",
+    "timeRemaining": 240,
+    "lastCheckpoint": "2024-08-03T15:45:12.000Z",
+    "pauseReason": null
+  },
+  "config": {
+    "qualityThreshold": 95,
+    "maxIterations": 3,
+    "autoSave": true,
+    "saveInterval": 5
+  }
+}

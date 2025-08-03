@@ -6,6 +6,7 @@ A comprehensive AI-driven development workflow system built on Claude Code's Sub
 
 - [Overview](#overview)
 - [System Architecture](#system-architecture)
+- [State Management Architecture](#state-management-architecture)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Slash Command Usage](#slash-command-usage)
@@ -26,6 +27,7 @@ The Spec Workflow System leverages Claude Code's Sub-Agents capability to create
 - **Automated Workflow**: Complete development pipeline from idea to production code
 - **Specialized Expertise**: Each agent focuses on their domain of expertise
 - **Quality Gates**: Automated checkpoints ensure quality standards
+- **Persistent State Management**: Resume workflows across sessions with full context
 - **Flexible Integration**: Works with existing specialized agents
 - **Comprehensive Documentation**: Every phase produces detailed artifacts
 
@@ -36,6 +38,8 @@ The Spec Workflow System leverages Claude Code's Sub-Agents capability to create
 - Comprehensive documentation generated automatically
 - Reduced errors through systematic processes
 - Better collaboration through clear workflows
+- Uninterrupted development with persistent state management
+- Safe resumption from any point of failure or interruption
 
 ## System Architecture
 
@@ -65,12 +69,111 @@ graph TD
     O -->|Pass| P[Production Ready]
     O -->|Fail| Q[Feedback Loop]
     
-    style B fill:#1a73e8,color:#fff
-    style G fill:#f9ab00,color:#fff
+    %% Agent Colors by Type
+    style B fill:#1a237e,color:#fff  %% Orchestrator - Deep Blue
+    style D fill:#1976d2,color:#fff  %% Analyst - Blue
+    style E fill:#7b1fa2,color:#fff  %% Architect - Purple
+    style F fill:#388e3c,color:#fff  %% Planner - Green
+    style I fill:#f57c00,color:#fff  %% Developer - Orange
+    style J fill:#0097a7,color:#fff  %% Tester - Cyan
+    style M fill:#d32f2f,color:#fff  %% Reviewer - Red
+    style N fill:#512da8,color:#fff  %% Validator - Deep Purple
+    
+    %% Quality Gates and Final State
+    style G fill:#f9ab00,color:#fff  %% Quality Gates - Amber
     style K fill:#f9ab00,color:#fff
     style O fill:#f9ab00,color:#fff
-    style P fill:#34a853,color:#fff
+    style P fill:#2e7d32,color:#fff  %% Production Ready - Dark Green
+    style Q fill:#ff5722,color:#fff  %% Feedback Loop - Deep Orange
 ```
+
+### Agent Color Legend
+
+| Color | Agent Type | Purpose |
+|-------|------------|---------|
+| 🔵 Deep Blue | **Orchestrator** | Workflow coordination and management |
+| 🔵 Blue | **Analyst** | Requirements analysis and planning |
+| 🟣 Purple | **Architect** | System design and architecture |
+| 🟢 Green | **Planner** | Task breakdown and planning |
+| 🟠 Orange | **Developer** | Code implementation |
+| 🔵 Cyan | **Tester** | Testing and quality assurance |
+| 🔴 Red | **Reviewer** | Code review and validation |
+| 🟣 Deep Purple | **Validator** | Final quality validation |
+| 🟡 Amber | **Quality Gates** | Automated quality checkpoints |
+
+## State Management Architecture
+
+The system includes a comprehensive state management layer that ensures workflow persistence and recovery:
+
+```mermaid
+graph TD
+    A[Workflow Execution] --> B[workflow-state-manager]
+    B --> C[State Storage]
+    C --> D[./workflow-states/]
+    
+    D --> E[active/]
+    D --> F[paused/]
+    D --> G[completed/]
+    D --> H[failed/]
+    D --> I[archived/]
+    
+    B --> J{State Operations}
+    J --> K[Save State]
+    J --> L[Load State]
+    J --> M[List States]
+    J --> N[Clean States]
+    
+    O[Session Monitoring] --> B
+    P[Quality Gates] --> B
+    Q[Error Recovery] --> B
+    
+    %% State Manager and Core Components
+    style B fill:#546e7a,color:#fff  %% State Manager - Blue Grey
+    style C fill:#5e35b1,color:#fff  %% Storage - Deep Purple
+    style D fill:#2e7d32,color:#fff  %% Root Directory - Dark Green
+    
+    %% State Directories by Status
+    style E fill:#4caf50,color:#fff  %% Active - Green
+    style F fill:#ff9800,color:#fff  %% Paused - Orange
+    style G fill:#2196f3,color:#fff  %% Completed - Blue
+    style H fill:#f44336,color:#fff  %% Failed - Red
+    style I fill:#9e9e9e,color:#fff  %% Archived - Grey
+    
+    %% Operations and Monitoring
+    style J fill:#ffc107,color:#000  %% Operations - Amber
+    style K fill:#e1f5fe,color:#01579b  %% Save - Light Blue
+    style L fill:#e8f5e8,color:#1b5e20  %% Load - Light Green
+    style M fill:#fff3e0,color:#e65100  %% List - Light Orange
+    style N fill:#fce4ec,color:#880e4f  %% Clean - Light Pink
+    
+    %% External Systems
+    style O fill:#e3f2fd,color:#0d47a1  %% Session Monitoring
+    style P fill:#fff8e1,color:#ff6f00  %% Quality Gates
+    style Q fill:#ffebee,color:#c62828  %% Error Recovery
+```
+
+### State Management Color Legend
+
+| Color | Component Type | Purpose |
+|-------|----------------|---------|
+| 🔵 Blue Grey | **State Manager** | Core state management agent |
+| 🟣 Deep Purple | **Storage Layer** | Data persistence infrastructure |
+| 🟢 Dark Green | **Project Root Directory** | Project-local storage organization |
+| 🟢 Green | **Active States** | Currently running workflows |
+| 🟠 Orange | **Paused States** | Temporarily suspended workflows |
+| 🔵 Blue | **Completed States** | Successfully finished workflows |
+| 🔴 Red | **Failed States** | Terminated or error workflows |
+| ⚫ Grey | **Archived States** | Long-term storage |
+| 🟡 Amber | **Operations Hub** | Command routing center |
+
+### State Management Features
+
+- **Project-Local Storage**: All workflow progress saved in project directory
+- **Session Recovery**: Resume from any interruption point
+- **Status Tracking**: Active, paused, completed, failed, archived
+- **Safe Operations**: Backup and validation before state changes
+- **Concurrent Safety**: Multiple workflows and sessions supported
+- **Storage Organization**: Structured directory hierarchy for easy management
 
 ## Installation
 
@@ -102,8 +205,44 @@ graph TD
    # Copy agents from this repository
    cp agents/* .claude/agents/
    
-   # Copy slash commands (including workflow resume commands)
+   # Copy slash commands (including workflow and state management commands)
    cp commands/agent-workflow*.md .claude/commands/
+   
+   # Create workflow state management directory structure in your project
+   mkdir -p workflow-states/{active,paused,completed,failed,archived,temp}
+   
+   # Initialize workflow state index file
+   echo '{"version":"1.0.0","created":"'$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'","lastUpdated":"'$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'","totalWorkflows":0,"workflowsByStatus":{"active":0,"paused":0,"completed":0,"failed":0,"archived":0},"workflows":{}}' > workflow-states/index.json
+   
+   # Create documentation file
+   cat > workflow-states/.gitkeep << 'EOF'
+# Project Workflow States Directory
+
+This directory contains all workflow state files for this specific project:
+
+- active/: Currently running workflows
+- paused/: Temporarily paused workflows  
+- completed/: Successfully completed workflows
+- failed/: Failed or abandoned workflows
+- archived/: Archived historical workflows
+- temp/: Temporary state files
+
+## File Organization
+
+- Each workflow state is stored as a JSON file
+- Naming pattern: {workflowId}.json
+- Master index maintained in index.json
+
+## Usage
+
+States are managed automatically by the workflow-state-manager agent.
+Manual editing is not recommended - use the provided commands instead:
+
+- /agent-workflow-state-save
+- /agent-workflow-state-load
+- /agent-workflow-state-list
+- /agent-workflow-state-clean
+EOF
    ```
 
 3. **Verify installation**
@@ -111,12 +250,16 @@ graph TD
    Your project structure should look like this:
 
    ```text
-   your-project/
-   ├── .claude/
+   your-project/                                # Your project root directory
+   ├── .claude/                                 # Claude Code configuration (copied from repository)
    │   ├── commands/
-   │   │   ├── agent-workflow.md         # Workflow start command
-   │   │   ├── agent-workflow-resume.md  # Workflow resume command
-   │   │   └── agent-workflow-list.md    # Workflow list command
+   │   │   ├── agent-workflow.md                # Workflow start command
+   │   │   ├── agent-workflow-resume.md         # Workflow resume command
+   │   │   ├── agent-workflow-list.md           # Workflow list command
+   │   │   ├── agent-workflow-state-save.md     # Save workflow state
+   │   │   ├── agent-workflow-state-load.md     # Load workflow state
+   │   │   ├── agent-workflow-state-list.md     # List workflow states
+   │   │   └── agent-workflow-state-clean.md    # Clean workflow states
    │   └── agents/
    │       ├── spec-analyst.md
    │       ├── spec-architect.md
@@ -126,11 +269,27 @@ graph TD
    │       ├── spec-reviewer.md
    │       ├── spec-tester.md
    │       ├── spec-validator.md
+   │       ├── workflow-state-manager.md        # State management agent
    │       └── ... (other agents)
-   └── ... (your project files)
+   ├── workflow-states/                         # PROJECT-LOCAL state directory
+   │   ├── active/                              # Active workflows for this project
+   │   ├── paused/                              # Paused workflows for this project
+   │   ├── completed/                           # Completed workflows for this project
+   │   ├── failed/                              # Failed workflows for this project
+   │   ├── archived/                            # Archived workflows for this project
+   │   ├── temp/                                # Temporary files
+   │   ├── index.json                           # Master workflow index for this project
+   │   └── .gitkeep                             # Directory documentation
+   ├── src/                                     # Your application source code
+   ├── package.json                             # Your project dependencies
+   └── ... (other project files)
    ```
 
 ## Quick Start
+
+### Important Notes
+
+> **⚠️ State Management Setup**: After copying files, the `workflow-states/` directory is essential for state persistence. If you skip this step, workflow resume functionality won't work and you'll get "No existing workflow state found" errors.
 
 ### Basic Usage
 
@@ -145,6 +304,7 @@ Ask Claude: "Use the spec-orchestrator agent to create a todo list web applicati
 # 4. Implement code
 # 5. Write tests
 # 6. Review and validate
+# 7. Save progress automatically in workflow-states/
 ```
 
 ### Simple Example
@@ -234,6 +394,38 @@ When workflows are interrupted, you can use the resume functionality to continue
 - **Session Awareness**: Monitors session time limits and auto-pauses long tasks
 - **Error Recovery**: Handles corrupted states and missing workflows
 
+### Workflow State Management
+
+For advanced state management and control over workflow persistence:
+
+```bash
+# Manual state operations
+/agent-workflow-state-save                    # Save current workflow state
+/agent-workflow-state-save <WORKFLOW_ID>      # Save specific workflow
+
+# Load and restore workflows
+/agent-workflow-state-load                    # Load most recent workflow
+/agent-workflow-state-load <WORKFLOW_ID>      # Load specific workflow
+
+# Browse and manage states
+/agent-workflow-state-list                    # List all workflow states
+/agent-workflow-state-list --status=active    # Filter by status
+/agent-workflow-state-list --recent=10        # Show recent workflows
+
+# Maintenance and cleanup
+/agent-workflow-state-clean                   # Interactive cleanup
+/agent-workflow-state-clean --older-than=30d  # Clean old workflows
+```
+
+#### State Management Features
+
+- **Persistent Storage**: Organized state storage in workflow-states/ directory
+- **Status Tracking**: Active, paused, completed, failed, and archived states
+- **Progress Monitoring**: Detailed phase completion and quality scores
+- **Artifact Management**: Tracks all generated files and documentation
+- **Safe Cleanup**: Protected cleanup with backup and validation
+- **Concurrent Safety**: Handles multiple workflow sessions safely
+
 **📖 For complete slash command documentation, see [commands/agent-workflow.md](./commands/agent-workflow.md)**
 
 ## How It Works
@@ -283,25 +475,57 @@ Agents communicate through structured artifacts:
 
 ### Workflow Agents
 
-| Agent | Purpose | Inputs | Outputs |
-|-------|---------|--------|---------|
-| spec-orchestrator | Workflow coordination | Project description | Status reports, routing |
-| spec-analyst | Requirements analysis | User description | requirements.md, user-stories.md |
-| spec-architect | System design | Requirements | architecture.md, api-spec.md |
-| spec-planner | Task planning | Architecture | tasks.md, test-plan.md |
-| spec-developer | Implementation | Tasks | Source code, unit tests |
-| spec-tester | Testing | Code | Test suites, coverage reports |
-| spec-reviewer | Code review | Code | Review report, improvements |
-| spec-validator | Final validation | All artifacts | Validation report, quality score |
+| Agent | Color | Purpose | Inputs | Outputs |
+|-------|-------|---------|--------|---------|
+| spec-orchestrator | 🔵 Deep Blue | Workflow coordination | Project description | Status reports, routing |
+| spec-analyst | 🔵 Blue | Requirements analysis | User description | requirements.md, user-stories.md |
+| spec-architect | 🟣 Purple | System design | Requirements | architecture.md, api-spec.md |
+| spec-planner | 🟢 Green | Task planning | Architecture | tasks.md, test-plan.md |
+| spec-developer | 🟠 Orange | Implementation | Tasks | Source code, unit tests |
+| spec-tester | 🔵 Cyan | Testing | Code | Test suites, coverage reports |
+| spec-reviewer | 🔴 Red | Code review | Code | Review report, improvements |
+| spec-validator | 🟣 Deep Purple | Final validation | All artifacts | Validation report, quality score |
+| workflow-state-manager | 🔵 Blue Grey | State management | Workflow operations | State persistence, recovery |
 
 ### Specialist Agents
 
-| Agent | Domain | Integration Point |
-|-------|--------|-------------------|
-| ui-ux-master | UI/UX Design | Planning phase |
-| senior-backend-architect | Backend Systems | Architecture phase |
-| senior-frontend-architect | Frontend Systems | Development phase |
-| refactor-agent | Code Quality | Any phase |
+| Agent | Color | Domain | Integration Point |
+|-------|-------|--------|-------------------|
+| ui-ux-master | 🟣 Pink Purple | UI/UX Design | Planning phase |
+| senior-backend-architect | 🟣 Indigo | Backend Systems | Architecture phase |
+| senior-frontend-architect | 🟠 Deep Orange | Frontend Systems | Development phase |
+| refactor-agent | 🟣 Purple | Code Quality | Any phase |
+
+### Complete Agent Color Reference
+
+All agents now include color definitions in their YAML frontmatter for consistent visual identification:
+
+```yaml
+# Example agent frontmatter with color
+---
+name: spec-developer
+description: Expert developer that implements features...
+tools: Read, Write, Edit, MultiEdit, Bash, Glob, Grep, TodoWrite
+color: "#f57c00"  # Orange - Implementation specialist
+---
+```
+
+**Color Hex Codes:**
+- **spec-orchestrator**: `#1a237e` (Deep Blue)
+- **spec-analyst**: `#1976d2` (Blue)
+- **spec-architect**: `#7b1fa2` (Purple)
+- **spec-planner**: `#388e3c` (Green)
+- **spec-developer**: `#f57c00` (Orange)
+- **spec-tester**: `#0097a7` (Cyan)
+- **spec-reviewer**: `#d32f2f` (Red)
+- **spec-validator**: `#512da8` (Deep Purple)
+- **workflow-state-manager**: `#546e7a` (Blue Grey)
+- **ui-ux-master**: `#ad1457` (Pink Purple)
+- **senior-backend-architect**: `#4527a0` (Indigo)
+- **senior-frontend-architect**: `#e65100` (Deep Orange)
+- **refactor-agent**: `#6a1b9a` (Purple)
+
+These colors are used in system architecture diagrams and can be utilized by UI frameworks that support agent visualization.
 
 ## Usage Examples
 
@@ -340,6 +564,54 @@ Load requirements from ./docs/requirements.md and continue workflow
 # Run only validation on existing code
 Use spec-orchestrator for validation phase only:
 Validate the project in ./my-app/
+```
+
+### Example 5: State Management Workflow
+
+```bash
+# Start a complex workflow that might be interrupted
+/agent-workflow "Large enterprise system with microservices architecture"
+
+# (During execution - automatic state saving happens)
+# If interrupted by session limits, Claude will automatically pause and save
+
+# Resume the workflow later
+/agent-workflow-state-load workflow_enterprise_system_1725364245000
+
+# Check progress of all workflows
+/agent-workflow-state-list --detailed
+
+# Clean up old completed workflows
+/agent-workflow-state-clean --completed --older-than=30d
+
+# Manual save during long development phase
+/agent-workflow-state-save --message="Before major refactoring"
+```
+
+### Example 6: Multi-Project Management
+
+```bash
+# List all active projects
+/agent-workflow-state-list --status=active
+
+# Output:
+# 📝 workflow_ecommerce_platform_1725300000000
+#    Feature: E-commerce platform with payment integration
+#    Progress: ████████▒▒ 80% (spec-validator)
+#    Updated: 2 hours ago
+#
+# 📝 workflow_mobile_app_1725364245000
+#    Feature: Cross-platform mobile productivity app
+#    Progress: ████▒▒▒▒▒▒ 40% (spec-developer)
+#    Updated: 30 minutes ago
+
+# Switch between projects
+/agent-workflow-state-load workflow_mobile_app_1725364245000
+# Continue working on mobile app...
+
+# Save current state and switch to e-commerce project  
+/agent-workflow-state-save
+/agent-workflow-state-load workflow_ecommerce_platform_1725300000000
 ```
 
 ## Quality Gates
@@ -399,30 +671,50 @@ Validate the project in ./my-app/
 
 ### Workflow State Management
 
-#### Workflow Persistence
+#### Advanced State Operations
 
 ```bash
-# Set custom workflow storage directory
-export CLAUDE_WORKFLOW_DIR="./my-workflows"
+# Detailed state management with options
+/agent-workflow-state-save <WORKFLOW_ID> --status=paused --message="Before major refactor"
+/agent-workflow-state-load <WORKFLOW_ID> --validate --repair
+/agent-workflow-state-list --detailed --with-artifacts
+/agent-workflow-state-clean --dry-run --older-than=30d
 
-# Auto-save workflow state to specified directory
-/agent-workflow "E-commerce platform development" --save-state
+# Batch operations
+/agent-workflow-state-clean --completed --older-than=7d --force
+/agent-workflow-state-list --status=active,paused --json > active-workflows.json
+```
 
-# Resume workflow from specific directory
-/agent-workflow-resume --from-dir "./backup-workflows"
+#### State Storage Structure
+
+The workflow state management system organizes states in a project-local directory:
+
+```text
+./workflow-states/
+├── active/          # Currently running workflows
+├── paused/          # Temporarily paused workflows  
+├── completed/       # Successfully completed workflows
+├── failed/          # Failed or abandoned workflows
+├── archived/        # Archived historical workflows
+├── temp/           # Temporary state files
+└── index.json      # Master workflow index
 ```
 
 #### Workflow Backup and Recovery
 
 ```bash
 # Backup all workflow states
-tar -czf workflows-backup-$(date +%Y%m%d).tar.gz .claude/workflows/
+tar -czf workflows-backup-$(date +%Y%m%d).tar.gz ./workflow-states/
 
 # Restore workflow states
 tar -xzf workflows-backup-20240802.tar.gz
 
-# Batch cleanup of expired workflows (older than 30 days)
-find .claude/workflows/ -name "*.json" -mtime +30 -delete
+# Selective backup by status
+tar -czf active-workflows-$(date +%Y%m%d).tar.gz ./workflow-states/active/
+tar -czf completed-workflows-$(date +%Y%m%d).tar.gz ./workflow-states/completed/
+
+# Safe cleanup with automatic backup
+/agent-workflow-state-clean --backup --older-than=60d
 ```
 
 ### Custom Workflow Templates
@@ -842,21 +1134,45 @@ execution:
 
 ### Common Issues
 
-1. **Agent Not Found**
-   - Verify agents are in correct directory
+1. **"No existing workflow state found" Error**
+   ```bash
+   # Cause: Missing workflow-states directory structure
+   # Solution: Create the required directories
+   mkdir -p ./workflow-states/{active,paused,completed,failed,archived,temp}
+   
+   # Copy the index template
+   echo '{"version":"1.0.0","totalWorkflows":0,"workflows":{}}' > ./workflow-states/index.json
+   ```
+
+2. **Agent Not Found**
+   - Verify agents are in correct directory (`.claude/agents/`)
    - Check YAML frontmatter format
    - Ensure proper file permissions
+   - Verify all agent files copied correctly
 
-2. **Quality Gate Failures**
+3. **Workflow Resume Fails**
+   ```bash
+   # Check if workflow-states directory exists
+   ls -la ./workflow-states/
+   
+   # Verify workflow state files
+   /agent-workflow-state-list
+   
+   # If corrupted, try repair
+   /agent-workflow-state-load <WORKFLOW_ID> --repair
+   ```
+
+4. **Quality Gate Failures**
    - Review specific criteria that failed
    - Check artifact completeness
    - Allow agents to revise work
    - Consider adjusting thresholds
 
-3. **Workflow Stuck**
+5. **Workflow Stuck**
    - Check orchestrator status
    - Review last agent output
    - Look for error messages
+   - Save current state: `/agent-workflow-state-save`
    - Restart from last checkpoint
 
 ### Debug Mode

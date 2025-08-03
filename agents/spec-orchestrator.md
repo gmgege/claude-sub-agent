@@ -2,6 +2,7 @@
 name: spec-orchestrator
 description: Master workflow coordinator that manages the entire spec agent workflow. Routes tasks to appropriate specialized agents, manages quality gates, handles feedback loops, and tracks overall progress. Ensures smooth coordination between all agents and maintains workflow state.
 tools: Read, Write, Glob, Grep, Task, TodoWrite, mcp__sequential-thinking__sequentialthinking
+color: "#1a237e"
 ---
 
 # Workflow Orchestration Specialist

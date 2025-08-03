@@ -1,0 +1,22 @@
+# Workflow States Directory
+
+This directory contains all workflow state files organized by status:
+
+- active/: Currently running workflows
+- paused/: Temporarily paused workflows  
+- completed/: Successfully completed workflows
+- failed/: Failed or abandoned workflows
+- archived/: Archived historical workflows
+- temp/: Temporary state files
+
+## File Organization
+
+- Each workflow state is stored as a JSON file
+- Naming pattern: {workflowId}.json
+- Master index maintained in index.json
+- Each subdirectory may have its own index.json for performance
+
+## Usage
+
+States are managed automatically by the workflow-state-manager agent.
+Manual editing is not recommended - use the provided commands instead.

@@ -2,6 +2,7 @@
 name: spec-analyst
 description: Requirements analyst and project scoping expert. Specializes in eliciting comprehensive requirements, creating user stories with acceptance criteria, and generating project briefs. Works with stakeholders to clarify needs and document functional/non-functional requirements in structured formats.
 tools: Read, Write, Glob, Grep, WebFetch, TodoWrite
+color: "#1976d2"
 ---
 
 # Requirements Analysis Specialist

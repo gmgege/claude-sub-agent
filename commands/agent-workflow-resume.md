@@ -34,18 +34,23 @@ Execute the following steps to resume workflow:
 
 ### 🔍 Step 1: Load Workflow State
 
-Load the workflow state manager and restore saved progress:
+Load the workflow state using the workflow-state-manager sub agent:
 
 ```javascript
-const WorkflowStateManager = require('./lib/workflow-state');
-const WorkflowCheckpointManager = require('./lib/workflow-checkpoints');
-
-const stateManager = new WorkflowStateManager();
-const checkpointManager = new WorkflowCheckpointManager();
-
 // Load specific workflow or find most recent
-const workflowId = '$ARGUMENTS' || findMostRecentWorkflow();
-const state = stateManager.loadState(workflowId);
+const workflowId = '$ARGUMENTS' || await findMostRecentActiveWorkflow();
+
+// Load state using workflow-state-manager
+const state = await useWorkflowStateManager({
+  operation: 'load-state',
+  workflowId: workflowId,
+  validate: true,
+  repair: true
+});
+
+if (!state) {
+  throw new Error(`Workflow state not found: ${workflowId}`);
+}
 ```
 
 ### 📊 Step 2: Display Resume Information
@@ -79,9 +84,23 @@ For validation phases, check previous scores and feedback:
 
 ### ⚠️ Step 5: Session Limit Awareness
 
-Monitor session time and pause if approaching limits:
+Monitor session time and pause if approaching limits using workflow-state-manager:
+```javascript
+// Check session limits during execution
+const sessionCheck = checkSessionLimits();
+if (sessionCheck.remainingTime < 30) {
+  await useWorkflowStateManager({
+    operation: 'save-state',
+    workflowId: state.workflowId,
+    pauseReason: 'session-limit-approaching'
+  });
+  
+  console.log(`⏸️ Auto-pausing workflow - Resume with: /agent-workflow-state-load ${state.workflowId}`);
+  return;
+}
+```
 - **>30 min remaining**: Continue normally
-- **<30 min remaining**: Show warning, offer pause option
+- **<30 min remaining**: Show warning and auto-save
 - **<5 min remaining**: Auto-pause and save state
 
 ## Error Handling

@@ -2,6 +2,7 @@
 name: spec-developer
 description: Expert developer that implements features based on specifications. Writes clean, maintainable code following architectural patterns and best practices. Creates unit tests, handles error cases, and ensures code meets performance requirements.
 tools: Read, Write, Edit, MultiEdit, Bash, Glob, Grep, TodoWrite
+color: "#f57c00"
 ---
 
 # Implementation Specialist

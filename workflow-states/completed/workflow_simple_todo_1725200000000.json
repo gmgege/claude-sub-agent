@@ -1,0 +1,144 @@
+{
+  "workflowId": "workflow_simple_todo_1725200000000",
+  "feature": "简单待办列表应用",
+  "createdAt": "2024-08-01T18:00:00.000Z",
+  "lastUpdated": "2024-08-02T02:45:30.000Z",
+  "status": "completed",
+  "currentPhase": "spec-tester",
+  "progress": {
+    "completed": 5,
+    "total": 5,
+    "percentage": 100
+  },
+  "iterations": {
+    "current": 2,
+    "max": 3,
+    "history": [
+      {
+        "iteration": 1,
+        "phase": "spec-analyst",
+        "startTime": "2024-08-01T18:00:00.000Z",
+        "endTime": "2024-08-01T18:30:15.000Z",
+        "outcome": "completed"
+      },
+      {
+        "iteration": 1,
+        "phase": "spec-architect",
+        "startTime": "2024-08-01T18:30:15.000Z",
+        "endTime": "2024-08-01T19:15:45.000Z",
+        "outcome": "completed"
+      },
+      {
+        "iteration": 1,
+        "phase": "spec-developer",
+        "startTime": "2024-08-01T19:15:45.000Z",
+        "endTime": "2024-08-01T23:20:10.000Z",
+        "outcome": "completed"
+      },
+      {
+        "iteration": 1,
+        "phase": "spec-validator",
+        "startTime": "2024-08-01T23:20:10.000Z",
+        "endTime": "2024-08-01T23:45:22.000Z",
+        "outcome": "failed",
+        "score": 88,
+        "feedback": "Code quality needs improvement in error handling"
+      },
+      {
+        "iteration": 2,
+        "phase": "spec-analyst",
+        "startTime": "2024-08-01T23:45:22.000Z",
+        "endTime": "2024-08-02T00:15:30.000Z",
+        "outcome": "completed"
+      },
+      {
+        "iteration": 2,
+        "phase": "spec-developer",
+        "startTime": "2024-08-02T00:15:30.000Z",
+        "endTime": "2024-08-02T01:45:15.000Z",
+        "outcome": "completed"
+      },
+      {
+        "iteration": 2,
+        "phase": "spec-validator",
+        "startTime": "2024-08-02T01:45:15.000Z",
+        "endTime": "2024-08-02T02:10:20.000Z",
+        "outcome": "completed",
+        "score": 96
+      },
+      {
+        "iteration": 2,
+        "phase": "spec-tester",
+        "startTime": "2024-08-02T02:10:20.000Z",
+        "endTime": "2024-08-02T02:45:30.000Z",
+        "outcome": "completed"
+      }
+    ]
+  },
+  "phases": {
+    "spec-analyst": {
+      "status": "completed",
+      "score": null,
+      "startTime": "2024-08-01T18:00:00.000Z",
+      "endTime": "2024-08-02T00:15:30.000Z",
+      "iterations": 2,
+      "artifacts": ["requirements.md", "user-stories.md", "acceptance-criteria.md", "requirements-v2.md"],
+      "feedback": null
+    },
+    "spec-architect": {
+      "status": "completed",
+      "score": 94,
+      "startTime": "2024-08-01T18:30:15.000Z",
+      "endTime": "2024-08-01T19:15:45.000Z",
+      "iterations": 1,
+      "artifacts": ["architecture.md", "api-spec.md", "tech-stack.md"],
+      "feedback": null
+    },
+    "spec-developer": {
+      "status": "completed",
+      "score": 96,
+      "startTime": "2024-08-01T19:15:45.000Z",
+      "endTime": "2024-08-02T01:45:15.000Z",
+      "iterations": 2,
+      "artifacts": ["src/", "tests/", "package.json", "README.md"],
+      "feedback": null
+    },
+    "spec-validator": {
+      "status": "completed",
+      "score": 96,
+      "startTime": "2024-08-01T23:20:10.000Z",
+      "endTime": "2024-08-02T02:10:20.000Z",
+      "iterations": 2,
+      "artifacts": ["validation-report.md", "quality-metrics.json"],
+      "feedback": null
+    },
+    "spec-tester": {
+      "status": "completed",
+      "score": null,
+      "startTime": "2024-08-02T02:10:20.000Z",
+      "endTime": "2024-08-02T02:45:30.000Z",
+      "iterations": 1,
+      "artifacts": ["tests/unit/", "tests/integration/", "tests/e2e/", "coverage-report.html"],
+      "feedback": null
+    }
+  },
+  "artifacts": {
+    "requirements": ["requirements.md", "user-stories.md", "acceptance-criteria.md", "requirements-v2.md"],
+    "architecture": ["architecture.md", "api-spec.md", "tech-stack.md"],
+    "implementation": ["src/", "tests/", "package.json", "README.md"],
+    "tests": ["tests/unit/", "tests/integration/", "tests/e2e/", "coverage-report.html"],
+    "validation": ["validation-report.md", "quality-metrics.json"]
+  },
+  "session": {
+    "sessionId": "session_todo_completed_1725200000000",
+    "timeRemaining": null,
+    "lastCheckpoint": "2024-08-02T02:45:30.000Z",
+    "pauseReason": null
+  },
+  "config": {
+    "qualityThreshold": 95,
+    "maxIterations": 3,
+    "autoSave": true,
+    "saveInterval": 5
+  }
+}
